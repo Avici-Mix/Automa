@@ -5,6 +5,7 @@ import com.zzb.automa.bean.User;
 import com.zzb.automa.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,13 +16,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value="/register")
-    public Result register(User user){
+    @PostMapping(path ="/register")
+    public Result register(@RequestBody User user){
         Result register =  userService.register(user);
         return register;
     }
 
-    @PostMapping(value = "/login")
+    @PostMapping(path = "/login")
     public Result login(User user) {
         return userService.login(user);
     }
