@@ -8,15 +8,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserMapper {
 
-    @Select(value = "select account_number,password from user where account_number = #{account_number}")
-    @Results({@Result(property = "account_number",column = "account_number"),
+    @Select(value = "select username,password from user where username = #{username}")
+    @Results({@Result(property = "username",column = "username"),
             @Result(property = "password",column = "password")})
-    User findUserByName(@Param("account_number") String account_number);
+    User findUserByName(@Param("username") String username);
 
-    @Insert("insert into user values(#{id},#{account_number},#{password},#{phone})")
+    @Insert("insert into user values(#{id},#{username},#{password},#{email})")
     @Options(useGeneratedKeys = true,keyProperty = "id",keyColumn = "id")
     void register(User user);
 
-    @Select("select id from user where account_number = #{account_number} and password= #{password}")
+    @Select("select id from user where username = #{username} and password= #{password}")
     Long Login(User user);
 }

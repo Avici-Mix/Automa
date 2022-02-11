@@ -24,7 +24,7 @@ public class UserService {
         result.setCode(-1);
         result.setDetail(null);
         try {
-            User exitUser = userMapper.findUserByName(user.getAccount_number());
+            User exitUser = userMapper.findUserByName(user.getUsername());
             if(exitUser!=null){
                 result.setCode(-1);
                 result.setMsg("用户名已存在");
