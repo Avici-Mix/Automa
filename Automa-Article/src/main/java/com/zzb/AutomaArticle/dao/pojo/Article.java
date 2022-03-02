@@ -13,11 +13,13 @@ public class Article {
 
     private String title;
 
-    private String digest;
+    private String summary;
 
     private int commentCounts;
 
     private int viewCounts;
+
+    private int likeCounts;
     /**
      * 作者id
      */

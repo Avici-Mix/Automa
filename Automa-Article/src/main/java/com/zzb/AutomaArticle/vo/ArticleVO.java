@@ -11,11 +11,13 @@ public class ArticleVO {
 
     private String title;
 
-    private String digest;
+    private String summary;
 
     private Integer commentCounts;
 
     private Integer viewCounts;
+
+    private Integer likeCounts;
 
     private Integer weight;
     /**
