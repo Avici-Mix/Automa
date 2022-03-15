@@ -1,12 +1,15 @@
 package com.zzb.AutomaArticle.vo;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class ArticleVO {
+//    @JsonSerialize(using = ToStringSerializer.class)
     private String id;
 
     private String title;
@@ -27,9 +30,9 @@ public class ArticleVO {
 
     private String author;
 
-//    private ArticleBodyVo body;
+    private ArticleBodyVo body;
 
     private List<TagVO> tags;
 
-//    private CategoryVo category;
+    private CategoryVO category;
 }

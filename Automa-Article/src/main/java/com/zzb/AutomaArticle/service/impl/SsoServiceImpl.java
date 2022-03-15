@@ -62,7 +62,7 @@ public class SsoServiceImpl implements SsoService {
     }
 
     @Override
-    public Result checkToken(String token) {
+    public SysUser checkToken(String token) {
         if(StringUtils.isBlank(token)){
            return null;
         }
@@ -75,12 +75,7 @@ public class SsoServiceImpl implements SsoService {
             return null;
         }
         SysUser sysUser = JSON.parseObject(userJson, SysUser.class);
-        LoginUserVO loginUserVO = new LoginUserVO();
-        loginUserVO.setId(sysUser.getId());
-        loginUserVO.setAccount(sysUser.getAccount());
-        loginUserVO.setAvatar(sysUser.getAccount());
-        loginUserVO.setNickname(sysUser.getNickname());
-        return Result.success(loginUserVO);
+        return sysUser;
     }
 
     @Override
@@ -118,7 +113,7 @@ public class SsoServiceImpl implements SsoService {
         sysUser.setPassword(DigestUtils.md5Hex(password+slat));
         sysUser.setCreateDate(System.currentTimeMillis());
         sysUser.setLastLogin(System.currentTimeMillis());
-        sysUser.setAvatar("/static/img/logo.b3a48c0.png");
+        sysUser.setAvatar("");
         sysUser.setAdmin(1); //1 为true
         sysUser.setDeleted(0); // 0 为false
         sysUser.setSalt("");

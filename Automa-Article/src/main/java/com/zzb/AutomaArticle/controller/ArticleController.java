@@ -1,14 +1,12 @@
 package com.zzb.AutomaArticle.controller;
 
+import com.zzb.AutomaArticle.common.aop.LogAnnotation;
 import com.zzb.AutomaArticle.service.ArticleService;
 import com.zzb.AutomaArticle.vo.Result;
+import com.zzb.AutomaArticle.vo.params.ArticleParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -24,6 +22,7 @@ public class ArticleController {
      * @return
      */
     @PostMapping
+    @LogAnnotation(module="文章",operator="获取文章列表")
     public Result listArticle(@RequestBody PageParamsVO pageParams){
         return articleService.listArticle(pageParams);
     }
@@ -56,5 +55,15 @@ public class ArticleController {
     @PostMapping("listArchives")
     public Result listArchives(){
         return articleService.listArchives();
+    }
+
+    @PostMapping("view/{id}")
+    public Result findArticleById(@PathVariable("id") Long articleId){
+        return articleService.findArticleById(articleId);
+    }
+
+    @PostMapping("publish")
+    public Result publish(@RequestBody ArticleParam articleParam){
+        return articleService.publish(articleParam);
     }
 }

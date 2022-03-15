@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Result extends SysUser {
+public class Result {
 
     private boolean success;
 

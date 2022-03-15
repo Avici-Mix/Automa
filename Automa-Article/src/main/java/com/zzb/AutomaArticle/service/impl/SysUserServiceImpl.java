@@ -6,7 +6,10 @@ import com.zzb.AutomaArticle.dao.pojo.SysUser;
 import com.zzb.AutomaArticle.service.SsoService;
 import com.zzb.AutomaArticle.service.SysUserService;
 import com.zzb.AutomaArticle.vo.ErrorCode;
+import com.zzb.AutomaArticle.vo.LoginUserVO;
 import com.zzb.AutomaArticle.vo.Result;
+import com.zzb.AutomaArticle.vo.UserVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +31,8 @@ public class SysUserServiceImpl  implements SysUserService {
         SysUser sysUser = sysUserMapper.selectById(id);
         if(sysUser==null){
             sysUser = new SysUser();
+            sysUser.setId(1L);
+            sysUser.setAvatar("/default_avatar.jpg");
             sysUser.setNickname("自动化之路");
         }
         return sysUser;
@@ -56,7 +61,12 @@ public class SysUserServiceImpl  implements SysUserService {
         if(sysUser == null){
             return Result.fail(ErrorCode.TOKEN_ERROR.getCode(),ErrorCode.TOKEN_ERROR.getMsg());
         }
-        return Result.success(sysUser);
+        LoginUserVO loginUserVO = new LoginUserVO();
+        loginUserVO.setId(sysUser.getId());
+        loginUserVO.setAccount(sysUser.getAccount());
+        loginUserVO.setAvatar(sysUser.getAvatar());
+        loginUserVO.setNickname(sysUser.getNickname());
+        return Result.success(loginUserVO);
     }
 
     @Override
@@ -70,5 +80,20 @@ public class SysUserServiceImpl  implements SysUserService {
     @Override
     public void save(SysUser sysUser) {
         this.sysUserMapper.insert(sysUser);
+    }
+
+    @Override
+    public UserVO findUserVOById(Long authorId) {
+        SysUser sysUser = sysUserMapper.selectById(authorId);
+        if(sysUser==null){
+            sysUser = new SysUser();
+            sysUser.setId(1L);
+            sysUser.setAvatar("/default_avatar.jpg");
+            sysUser.setNickname("自动化之路");
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(sysUser,userVO);
+        userVO.setId(String.valueOf(sysUser.getId()));
+        return userVO;
     }
 }

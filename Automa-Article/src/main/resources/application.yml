@@ -1,6 +1,9 @@
 server:
   port: 9091
 spring:
+  web:
+    resources:
+      static-locations: classpath:static/
   datasource:
     url: jdbc:mysql://localhost:3306/automa?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
     username: root
@@ -8,11 +11,21 @@ spring:
   redis:
     host: localhost
     port: 6379
+  servlet:
+    multipart:
+      max-request-size: 20MB
+      max-file-size: 2MB
 
 mybatis-plus:
   global-config:
     db-config:
       table-prefix: au_
 
+huaweiyun:
+  obs:
+    ak: A0AZNIUCHX7CVELZIQZR
+    sk: k7DYqFUJzuOT8MxKvUsBvuADImnBqnAoGAqvQXqO
+    bucketName: automa
+    endpoint:  https://obs.cn-south-1.myhuaweicloud.com
 
 effectiveDate: 3

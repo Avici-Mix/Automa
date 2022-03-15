@@ -2,6 +2,7 @@ package com.zzb.AutomaArticle.service;
 
 
 import com.zzb.AutomaArticle.vo.Result;
+import com.zzb.AutomaArticle.vo.params.ArticleParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
 
 import java.util.List;
@@ -30,4 +31,8 @@ public interface ArticleService {
     Result newArticles(int limit);
 
     Result listArchives();
+
+    Result findArticleById(Long articleId);
+
+    Result publish(ArticleParam articleParam);
 }
