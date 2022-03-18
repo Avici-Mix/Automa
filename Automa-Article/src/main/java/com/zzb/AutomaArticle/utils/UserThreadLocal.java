@@ -1,7 +1,9 @@
 package com.zzb.AutomaArticle.utils;
 
 import com.zzb.AutomaArticle.dao.pojo.SysUser;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class UserThreadLocal {
 
     private UserThreadLocal(){}
@@ -10,6 +12,7 @@ public class UserThreadLocal {
 
    public static void put(SysUser sysUser){
        LOCAL.set(sysUser);
+       log.info("线程池中放入用户："+LOCAL.get());
    }
 
    public static SysUser get(){

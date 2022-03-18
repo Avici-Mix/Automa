@@ -1,6 +1,7 @@
 package com.zzb.AutomaArticle.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zzb.AutomaArticle.dao.dos.Archives;
@@ -19,6 +20,7 @@ import com.zzb.AutomaArticle.vo.params.PageParamsVO;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,6 +44,9 @@ public class ArticleServiceImpl implements ArticleService {
     private ThreadService threadService;
     @Autowired
     private ArticleTagMapper articleTagMapper;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
 
     @Override
     public Result listArticle(PageParamsVO pageParams) {
@@ -51,14 +56,23 @@ public class ArticleServiceImpl implements ArticleService {
          * @return
          */
 
-        Page<Article> page = new Page<>(pageParams.getPage(), pageParams.getPageSize());
-        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        //order by create data desc  先按照置顶排序，再按照时间排序
-        queryWrapper.orderByDesc(Article::getWeight,Article::getCreateDate);
-        Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
-        List<Article> records = articlePage.getRecords();
-        List<ArticleVO> articleVOList = copyList(records,true,true);
-        return Result.success(articleVOList) ;
+        Page<Article> page = new Page<>(pageParams.getPage(),pageParams.getPageSize());
+
+        IPage<Article> articleIPage = articleMapper.listArticle(
+                page,
+                pageParams.getCategoryId(),
+                pageParams.getTagId(),
+                pageParams.getYear(),
+                pageParams.getMonth());
+        List<Article> records = articleIPage.getRecords();
+        for (Article record : records) {
+            String viewCount = (String) redisTemplate.opsForHash().get("view_count", String.valueOf(record.getId()));
+            if (viewCount != null){
+                record.setViewCounts(Integer.parseInt(viewCount));
+            }
+        }
+        List<ArticleVO> articleVOList = copyList(records, true, true);
+        return Result.success(articleVOList);
     }
 
     @Override
@@ -91,13 +105,28 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Result findArticleById(Long articleId) {
+        /**
+         * 1. 根据id查询 文章信息
+         * 2. 根据bodyId和categoryid 去做关联查询
+         */
         Article article = this.articleMapper.selectById(articleId);
-        ArticleVO articleVO = copy(article, true, true,true,true);
-        return Result.success(articleVO);
+        ArticleVO articleVo = copy(article, true, true,true,true);
+        //查看完文章了，新增阅读数，有没有问题呢？
+        //查看完文章之后，本应该直接返回数据了，这时候做了一个更新操作，更新时加写锁，阻塞其他的读操作，性能就会比较低
+        // 更新 增加了此次接口的 耗时 如果一旦更新出问题，不能影响 查看文章的操作
+        //线程池  可以把更新操作 扔到线程池中去执行，和主线程就不相关了
+        threadService.updateArticleViewCount(articleMapper,article);
+
+        String viewCount = (String) redisTemplate.opsForHash().get("view_count", String.valueOf(articleId));
+        if (viewCount != null){
+            articleVo.setViewCounts(Integer.parseInt(viewCount));
+        }
+        return Result.success(articleVo);
     }
 
     @Override
     public Result publish(ArticleParam articleParam) {
+        System.out.println(articleParam);
         SysUser sysUser = UserThreadLocal.get();
 
         Article article;

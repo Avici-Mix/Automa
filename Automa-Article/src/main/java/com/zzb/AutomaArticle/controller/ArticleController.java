@@ -1,6 +1,7 @@
 package com.zzb.AutomaArticle.controller;
 
 import com.zzb.AutomaArticle.common.aop.LogAnnotation;
+import com.zzb.AutomaArticle.common.cache.Cache;
 import com.zzb.AutomaArticle.service.ArticleService;
 import com.zzb.AutomaArticle.vo.Result;
 import com.zzb.AutomaArticle.vo.params.ArticleParam;
@@ -23,6 +24,7 @@ public class ArticleController {
      */
     @PostMapping
     @LogAnnotation(module="文章",operator="获取文章列表")
+    @Cache(expire = 5 * 60 * 1000,name = "listArticle")
     public Result listArticle(@RequestBody PageParamsVO pageParams){
         return articleService.listArticle(pageParams);
     }
@@ -32,6 +34,7 @@ public class ArticleController {
      * @return
      */
     @PostMapping("hot")
+    @Cache(expire = 5 * 60 * 1000,name = "hot_article")
     public Result hotArticle(){
         int limit =5;
         return articleService.hotArticles(limit);
@@ -42,6 +45,7 @@ public class ArticleController {
      * @return
      */
     @PostMapping("new")
+    @Cache(expire = 5 * 60 * 1000,name = "news_article")
     public Result newArticles(){
         int limit =5;
         return articleService.newArticles(limit);
@@ -58,6 +62,7 @@ public class ArticleController {
     }
 
     @PostMapping("view/{id}")
+    @Cache(expire = 5 * 60 * 1000,name = "view_article")
     public Result findArticleById(@PathVariable("id") Long articleId){
         return articleService.findArticleById(articleId);
     }

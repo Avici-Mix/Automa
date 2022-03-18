@@ -25,7 +25,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("拦截器");
+        log.info("拦截器----------------");
 
 //        在执行controller方法（Handler）之前执行
         /**

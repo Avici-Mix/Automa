@@ -9,13 +9,16 @@ import com.zzb.AutomaArticle.vo.ErrorCode;
 import com.zzb.AutomaArticle.vo.LoginUserVO;
 import com.zzb.AutomaArticle.vo.Result;
 import com.zzb.AutomaArticle.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+
 @Service
+@Slf4j
 public class SysUserServiceImpl  implements SysUserService {
 
     @Autowired
@@ -56,7 +59,7 @@ public class SysUserServiceImpl  implements SysUserService {
          * 2、校验失败，返回错误
          * 3、如果成功，返回对应的结果
          */
-
+        log.info("token 为"+token);
         SysUser sysUser = ssoService.checkToken(token);
         if(sysUser == null){
             return Result.fail(ErrorCode.TOKEN_ERROR.getCode(),ErrorCode.TOKEN_ERROR.getMsg());
