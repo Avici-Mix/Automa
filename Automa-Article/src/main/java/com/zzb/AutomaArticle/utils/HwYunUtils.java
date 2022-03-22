@@ -38,6 +38,7 @@ public class HwYunUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println( putObjectResult.getObjectUrl());
         return putObjectResult;
     }
 }
