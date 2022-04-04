@@ -18,4 +18,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
                                Long tagId,
                                String year,
                                String month);
+
+    void updateCommentCount(Long articleId);
+
+    int getArticleListLength(Long categoryId);
 }

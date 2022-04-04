@@ -1,16 +1,20 @@
 package com.zzb.AutomaArticle.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zzb.AutomaArticle.dao.mapper.ArticleMapper;
 import com.zzb.AutomaArticle.dao.mapper.CommentMapper;
+import com.zzb.AutomaArticle.dao.pojo.Article;
 import com.zzb.AutomaArticle.dao.pojo.Comment;
 import com.zzb.AutomaArticle.dao.pojo.SysUser;
 import com.zzb.AutomaArticle.service.CommentService;
 import com.zzb.AutomaArticle.service.SysUserService;
 import com.zzb.AutomaArticle.utils.UserThreadLocal;
+import com.zzb.AutomaArticle.vo.ArticleMessage;
 import com.zzb.AutomaArticle.vo.CommentVO;
 import com.zzb.AutomaArticle.vo.Result;
 import com.zzb.AutomaArticle.vo.UserVO;
 import com.zzb.AutomaArticle.vo.params.CommentParam;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private SysUserService sysUserService;
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    
+    @Autowired
+    private ArticleMapper articleMapper;
 
 
     @Override
@@ -57,6 +67,14 @@ public class CommentServiceImpl implements CommentService {
         Long toUserId = commentParam.getToUserId();
         comment.setToUid(toUserId == null ? 0 : toUserId);
         this.commentMapper.insert(comment);
+
+        Long articleId = comment.getArticleId();
+
+        articleMapper.updateCommentCount(articleId);
+
+        ArticleMessage articleMessage = new ArticleMessage();
+        articleMessage.setArticleId(articleId);
+        rocketMQTemplate.convertAndSend("automa-update-articleList",articleMessage);
         return Result.success(null);
     }
 

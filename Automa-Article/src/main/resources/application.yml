@@ -11,14 +11,19 @@ spring:
   redis:
     host: 116.205.131.39
     port: 6379
-    timeout: 5000
     jedis:
       pool:
         max-wait: -1
+    password: "000123"
   servlet:
     multipart:
       max-request-size: 20MB
       max-file-size: 2MB
+
+rocketmq:
+  name-server: 116.205.131.39:9876
+  producer:
+    group: automa_group
 
 mybatis-plus:
   global-config:

@@ -21,6 +21,19 @@
             select year(FROM_UNIXTIME(create_date/1000)) year,month(FROM_UNIXTIME(create_date/1000)) month, count(*) count from au_article group by year,month;
     </select>
 
+    <update id="updateCommentCount">
+        UPDATE au_article SET comment_counts = comment_counts + 1 where id = #{articleId}
+    </update>
+
+    <select id="getArticleListLength" resultType="Integer">
+        SELECT count(*) from au_article
+        <where>
+            <if test="categoryId != null">
+                and category_id=#{categoryId}
+            </if>
+        </where>
+    </select>
+
     <select id="listArticle" resultMap="articleMap">
         select * from au_article
         <where>

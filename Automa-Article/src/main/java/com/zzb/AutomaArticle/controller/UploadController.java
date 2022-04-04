@@ -28,6 +28,6 @@ public class UploadController {
         String fileName = UUID.randomUUID().toString() + "." + StringUtils.substringAfterLast(originalFilename, '.');
 //       上传文件
         PutObjectResult putObjectResult = hwYunUtils.uploadFile(file, fileName);
-        return Result.success(putObjectResult);
+        return Result.success(putObjectResult.getObjectUrl());
     }
 }

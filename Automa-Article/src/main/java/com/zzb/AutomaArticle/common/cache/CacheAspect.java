@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.Set;
 
 @Aspect
 @Component
@@ -51,6 +52,7 @@ public class CacheAspect {
                     parameterTypes[i] = null;
                 }
             }
+//            文章详情的缓存实际上是
             if (StringUtils.isNotEmpty(params)) {
                 //加密 以防出现key过长以及字符转义获取不到的情况
                 params = DigestUtils.md5Hex(params);
@@ -58,7 +60,7 @@ public class CacheAspect {
             Method method = pjp.getSignature().getDeclaringType().getMethod(methodName, parameterTypes);
 //        获取Cashe注解
             Cache annotation = method.getAnnotation(Cache.class);
-//        缓存过期手机拿
+//        缓存过期时间
             long expire = annotation.expire();
 //        缓存名称
             String name = annotation.name();
@@ -66,13 +68,18 @@ public class CacheAspect {
             //先从redis获取
             String redisKey = name + "::" + className + "::" + methodName + "::" + params;
             String redisValue = redisTemplate.opsForValue().get(redisKey);
+
+            Set<String> keys = redisTemplate.keys("*");
+            System.out.println(keys+"键");
+
+
             if (StringUtils.isNotEmpty(redisValue)) {
-                log.info("走了缓存~~~,{},{}", className, methodName);
+                log.info("走了缓存~~~,{}", redisKey);
                 return JSON.parseObject(redisValue, Result.class);
             }
             Object proceed = pjp.proceed();
             redisTemplate.opsForValue().set(redisKey,JSON.toJSONString(proceed), Duration.ofMillis(expire));
-            log.info("存入缓存~~~ {},{}",className,methodName);
+            log.info("存入缓存~~~ {}",className,methodName);
             return proceed;
         } catch (Throwable throwable) {
             throwable.printStackTrace();

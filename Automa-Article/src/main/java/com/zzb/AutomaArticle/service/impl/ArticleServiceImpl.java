@@ -17,6 +17,7 @@ import com.zzb.AutomaArticle.utils.UserThreadLocal;
 import com.zzb.AutomaArticle.vo.*;
 import com.zzb.AutomaArticle.vo.params.ArticleParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -46,7 +48,8 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleTagMapper articleTagMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
-
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public Result listArticle(PageParamsVO pageParams) {
@@ -72,7 +75,13 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
         List<ArticleVO> articleVOList = copyList(records, true, true);
-        return Result.success(articleVOList);
+
+        ArticleListVO articleListVO = new ArticleListVO();
+        articleListVO.setArticleList(articleVOList);
+        articleListVO.setLength(articleMapper.getArticleListLength(pageParams.getCategoryId()));
+
+
+        return Result.success(articleListVO);
     }
 
     @Override
@@ -118,6 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
         threadService.updateArticleViewCount(articleMapper,article);
 
         String viewCount = (String) redisTemplate.opsForHash().get("view_count", String.valueOf(articleId));
+        System.out.println("viewCount------   "+viewCount);
         if (viewCount != null){
             articleVo.setViewCounts(Integer.parseInt(viewCount));
         }
@@ -126,7 +136,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Result publish(ArticleParam articleParam) {
-        System.out.println(articleParam);
         SysUser sysUser = UserThreadLocal.get();
 
         Article article;
@@ -146,6 +155,7 @@ public class ArticleServiceImpl implements ArticleService {
             article.setAuthorId(sysUser.getId());
             article.setWeight(Article.Article_Common);
             article.setViewCounts(0);
+            article.setSummary(articleParam.getSummary());
             article.setTitle(articleParam.getTitle());
             article.setCommentCounts(0);
             article.setCreateDate(System.currentTimeMillis());
@@ -188,16 +198,20 @@ public class ArticleServiceImpl implements ArticleService {
 
             article.setBodyId(articleBody.getId());
             articleMapper.updateById(article);
+
         }
         HashMap<String, String> map = new HashMap<>();
         map.put("id",article.getId().toString());
 
-//        if (isEdit){
-//            //发送一条消息给rocketmq 当前文章更新了，更新一下缓存吧
-//            ArticleMessage articleMessage = new ArticleMessage();
-//            articleMessage.setArticleId(article.getId());
-//            rocketMQTemplate.convertAndSend("blog-update-article",articleMessage);
-//        }
+
+        ArticleMessage articleMessage = new ArticleMessage();
+        articleMessage.setArticleId(article.getId());
+        if (isEdit){
+            //发送一条消息给rocketmq 当前文章更新了，更新一下缓存吧
+            rocketMQTemplate.convertAndSend("automa-update-article",articleMessage);
+        }else{
+            rocketMQTemplate.convertAndSend("automa-update-articleList",articleMessage);
+        }
 
 
         return Result.success(map);
