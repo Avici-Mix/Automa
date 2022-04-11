@@ -9,4 +9,6 @@ public class LoginParamsVO {
     private String password;
 
     private String nickname;
+
+    private String avatar;
 }

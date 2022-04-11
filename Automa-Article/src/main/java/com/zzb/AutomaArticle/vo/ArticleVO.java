@@ -30,6 +30,8 @@ public class ArticleVO {
 
     private String author;
 
+    private String authorAvatar;
+
     private ArticleBodyVo body;
 
     private List<TagVO> tags;

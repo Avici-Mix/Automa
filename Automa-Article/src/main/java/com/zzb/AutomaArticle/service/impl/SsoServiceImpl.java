@@ -97,6 +97,7 @@ public class SsoServiceImpl implements SsoService {
         String account = loginParamsVO.getAccount();
         String password = loginParamsVO.getPassword();
         String nickname = loginParamsVO.getNickname();
+        String avatar = loginParamsVO.getAvatar();
         if (StringUtils.isBlank(account)
                 || StringUtils.isBlank(password)
                 || StringUtils.isBlank(nickname)
@@ -113,7 +114,7 @@ public class SsoServiceImpl implements SsoService {
         sysUser.setPassword(DigestUtils.md5Hex(password+slat));
         sysUser.setCreateDate(System.currentTimeMillis());
         sysUser.setLastLogin(System.currentTimeMillis());
-        sysUser.setAvatar("");
+        sysUser.setAvatar(avatar);
         sysUser.setAdmin(1); //1 为true
         sysUser.setDeleted(0); // 0 为false
         sysUser.setSalt("");
