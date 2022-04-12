@@ -5,23 +5,22 @@ spring:
     resources:
       static-locations: classpath:static/
   datasource:
-    url: jdbc:mysql://116.205.131.39:3306/automa?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT&useSSL=false
+    url: jdbc:mysql://47.95.122.63:3306/automa?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT&useSSL=false
     username: root
-    password: "000923"
+    password: "admin"
   redis:
-    host: 116.205.131.39
+    host: 47.95.122.63
     port: 6379
     jedis:
       pool:
         max-wait: -1
-    password: "000123"
   servlet:
     multipart:
       max-request-size: 20MB
       max-file-size: 2MB
 
 rocketmq:
-  name-server: 116.205.131.39:9876
+  name-server: 47.95.122.63:9876
   producer:
     group: automa_group
 
