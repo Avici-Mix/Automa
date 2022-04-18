@@ -1,5 +1,6 @@
 package com.zzb.AutomaArticle.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zzb.AutomaArticle.dao.mapper.ArticleMapper;
 import com.zzb.AutomaArticle.dao.mapper.CommentMapper;
@@ -9,10 +10,8 @@ import com.zzb.AutomaArticle.dao.pojo.SysUser;
 import com.zzb.AutomaArticle.service.CommentService;
 import com.zzb.AutomaArticle.service.SysUserService;
 import com.zzb.AutomaArticle.utils.UserThreadLocal;
-import com.zzb.AutomaArticle.vo.ArticleMessage;
-import com.zzb.AutomaArticle.vo.CommentVO;
-import com.zzb.AutomaArticle.vo.Result;
-import com.zzb.AutomaArticle.vo.UserVO;
+import com.zzb.AutomaArticle.vo.*;
+import com.zzb.AutomaArticle.vo.params.ArticleViewParam;
 import com.zzb.AutomaArticle.vo.params.CommentParam;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
@@ -72,9 +71,15 @@ public class CommentServiceImpl implements CommentService {
 
         articleMapper.updateCommentCount(articleId);
 
-        ArticleMessage articleMessage = new ArticleMessage();
-        articleMessage.setArticleId(articleId);
-        rocketMQTemplate.convertAndSend("automa-update-articleList",articleMessage);
+        ArticleCashMessage articleCashMessage = new ArticleCashMessage();
+        ArticleViewParam articleViewParam = new ArticleViewParam();
+        articleViewParam.setCategoryId(commentParam.getArticleCategoryId());
+        articleViewParam.setPage(commentParam.getArticlePage());
+        articleViewParam.setPageSize(commentParam.getArticlePageSize());
+        articleCashMessage.setArticleViewParam(articleViewParam);
+        String key = "listArticle::ArticleController::listArticle::" +JSON.toJSONString(articleViewParam);
+        articleCashMessage.setRedisKey(key);
+        rocketMQTemplate.convertAndSend("automa-update-articleList",articleCashMessage);
         return Result.success(null);
     }
 

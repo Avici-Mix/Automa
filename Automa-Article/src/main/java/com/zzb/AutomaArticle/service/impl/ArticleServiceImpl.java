@@ -17,6 +17,7 @@ import com.zzb.AutomaArticle.utils.UserThreadLocal;
 import com.zzb.AutomaArticle.vo.*;
 import com.zzb.AutomaArticle.vo.params.ArticleParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
@@ -85,6 +87,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    public Result listArticleFromCash(PageParamsVO pageParams) {
+        return null;
+    }
+
+    @Override
     public Result hotArticles(int limit) {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.orderByDesc(Article::getViewCounts);
@@ -124,10 +131,9 @@ public class ArticleServiceImpl implements ArticleService {
         //查看完文章之后，本应该直接返回数据了，这时候做了一个更新操作，更新时加写锁，阻塞其他的读操作，性能就会比较低
         // 更新 增加了此次接口的 耗时 如果一旦更新出问题，不能影响 查看文章的操作
         //线程池  可以把更新操作 扔到线程池中去执行，和主线程就不相关了
-        threadService.updateArticleViewCount(articleMapper,article);
+/*        threadService.updateArticleViewCount(articleMapper,article.getId());*/
 
         String viewCount = (String) redisTemplate.opsForHash().get("view_count", String.valueOf(articleId));
-        System.out.println("viewCount------   "+viewCount);
         if (viewCount != null){
             articleVo.setViewCounts(Integer.parseInt(viewCount));
         }
@@ -204,13 +210,18 @@ public class ArticleServiceImpl implements ArticleService {
         map.put("id",article.getId().toString());
 
 
-        ArticleMessage articleMessage = new ArticleMessage();
+        ArticleCashMessageId articleMessage = new ArticleCashMessageId();
         articleMessage.setArticleId(article.getId());
+        articleMessage.setIsDeleteList(true);
         if (isEdit){
             //发送一条消息给rocketmq 当前文章更新了，更新一下缓存吧
             rocketMQTemplate.convertAndSend("automa-update-article",articleMessage);
         }else{
-            rocketMQTemplate.convertAndSend("automa-update-articleList",articleMessage);
+            Set<String> keys = redisTemplate.keys("listArticle*");
+            keys.forEach(s -> {
+                redisTemplate.delete(s);
+                log.info("删除了文章列表的缓存:{}",s);
+            });
         }
 
 

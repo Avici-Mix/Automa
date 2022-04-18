@@ -5,6 +5,7 @@ import com.zzb.AutomaArticle.common.cache.Cache;
 import com.zzb.AutomaArticle.service.ArticleService;
 import com.zzb.AutomaArticle.vo.Result;
 import com.zzb.AutomaArticle.vo.params.ArticleParam;
+import com.zzb.AutomaArticle.vo.params.ArticleViewParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -63,7 +64,7 @@ public class ArticleController {
 
     @PostMapping("view/{id}")
     @Cache(expire = 5 * 60 * 1000,name = "view_article")
-    public Result findArticleById(@PathVariable("id") Long articleId){
+    public Result findArticleById(@PathVariable("id") Long articleId, @RequestBody ArticleViewParam articleViewParam){
         return articleService.findArticleById(articleId);
     }
 

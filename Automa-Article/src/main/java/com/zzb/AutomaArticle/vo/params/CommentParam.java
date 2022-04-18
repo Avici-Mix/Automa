@@ -11,4 +11,10 @@ public class CommentParam {
     private Long parent;
 
     private Long toUserId;
+
+    private int articleCategoryId;
+
+    private int articlePage;
+
+    private int articlePageSize;
 }
