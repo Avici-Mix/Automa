@@ -74,8 +74,6 @@ public class CacheAspect {
             String redisValue = redisTemplate.opsForValue().get(redisKey);
 
 
-
-
             if (StringUtils.isNotEmpty(redisValue)) {
                 //  阅读数更新，缓存更新
                 if(methodName.equals("findArticleById")){
@@ -83,10 +81,9 @@ public class CacheAspect {
                     BeanUtils.copyProperties(articleViewParam,args[1]);
 
                     log.info("reids中增加view_count");
-                        threadService.updateArticleViewCount((Long) args[0],articleViewParam,redisKey);
+                    threadService.updateArticleViewCount((Long) args[0],articleViewParam,redisKey);
 
                 }
-
                 log.info("走了缓存~~~,{}", redisKey);
                 return JSON.parseObject(redisValue, Result.class);
             }

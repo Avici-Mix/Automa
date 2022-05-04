@@ -14,6 +14,7 @@ spring:
     jedis:
       pool:
         max-wait: -1
+    password: "000123"
   servlet:
     multipart:
       max-request-size: 20MB

@@ -25,10 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -62,7 +60,6 @@ public class ArticleServiceImpl implements ArticleService {
          */
 
         Page<Article> page = new Page<>(pageParams.getPage(),pageParams.getPageSize());
-
         IPage<Article> articleIPage = articleMapper.listArticle(
                 page,
                 pageParams.getCategoryId(),
@@ -77,12 +74,9 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
         List<ArticleVO> articleVOList = copyList(records, true, true);
-
         ArticleListVO articleListVO = new ArticleListVO();
         articleListVO.setArticleList(articleVOList);
         articleListVO.setLength(articleMapper.getArticleListLength(pageParams.getCategoryId()));
-
-
         return Result.success(articleListVO);
     }
 
@@ -160,7 +154,7 @@ public class ArticleServiceImpl implements ArticleService {
             article = new Article();
             article.setAuthorId(sysUser.getId());
             article.setWeight(Article.Article_Common);
-            article.setViewCounts(0);
+            article.setViewCounts(1);
             article.setSummary(articleParam.getSummary());
             article.setTitle(articleParam.getTitle());
             article.setCommentCounts(0);
@@ -173,7 +167,6 @@ public class ArticleServiceImpl implements ArticleService {
         List<TagVO> tags = articleParam.getTags();
         if(tags!=null){
             for (TagVO tag : tags) {
-
                 Long articleId = article.getId();
                 if(isEdit){
                     LambdaQueryWrapper<ArticleTag> queryWrapper = Wrappers.lambdaQuery();
@@ -240,7 +233,15 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleVO articleVO = new ArticleVO();
         articleVO.setId(String.valueOf(article.getId()));
         BeanUtils.copyProperties(article,articleVO);
-        articleVO.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd HH:mm"));
+
+        if(article.getCreateDate()!=null){
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+            String format = simpleDateFormat.format(new Date(article.getCreateDate()));
+            articleVO.setCreateDate(format);
+            System.out.println("时间"+format);
+        }
+
         if(isTag){
             Long articleId = article.getId();
             articleVO.setTags(tagService.findTagsByArticleId(articleId));
