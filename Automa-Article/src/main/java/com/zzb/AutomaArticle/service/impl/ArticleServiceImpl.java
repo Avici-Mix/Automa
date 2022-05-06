@@ -81,11 +81,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result listArticleFromCash(PageParamsVO pageParams) {
-        return null;
-    }
-
-    @Override
     public Result hotArticles(int limit) {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.orderByDesc(Article::getViewCounts);
@@ -221,6 +216,8 @@ public class ArticleServiceImpl implements ArticleService {
         return Result.success(map);
     }
 
+
+
     private List<ArticleVO> copyList(List<Article> records,boolean isTag,boolean isAuthor) {
         ArrayList<ArticleVO> articleVOList = new ArrayList<>();
         for (Article record : records) {
@@ -239,7 +236,6 @@ public class ArticleServiceImpl implements ArticleService {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
             String format = simpleDateFormat.format(new Date(article.getCreateDate()));
             articleVO.setCreateDate(format);
-            System.out.println("时间"+format);
         }
 
         if(isTag){

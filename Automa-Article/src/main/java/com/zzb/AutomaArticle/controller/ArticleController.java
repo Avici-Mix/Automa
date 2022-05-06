@@ -30,6 +30,11 @@ public class ArticleController {
         return articleService.listArticle(pageParams);
     }
 
+    @PostMapping("tag")
+    public Result listArticleByTag(@RequestBody PageParamsVO pageParams){
+        return articleService.listArticle(pageParams);
+    }
+
     /**
      *  首页 最热文章
      * @return

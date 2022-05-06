@@ -16,8 +16,6 @@ public interface ArticleService {
      */
     Result listArticle(PageParamsVO pageParams);
 
-    Result listArticleFromCash(PageParamsVO pageParams);
-
     /**
      * 最热文章
      * @param limit
