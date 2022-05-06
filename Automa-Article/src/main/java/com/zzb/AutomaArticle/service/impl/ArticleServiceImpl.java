@@ -1,5 +1,6 @@
 package com.zzb.AutomaArticle.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -18,6 +19,8 @@ import com.zzb.AutomaArticle.vo.*;
 import com.zzb.AutomaArticle.vo.params.ArticleParam;
 import com.zzb.AutomaArticle.vo.params.PageParamsVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
@@ -198,20 +201,21 @@ public class ArticleServiceImpl implements ArticleService {
         map.put("id",article.getId().toString());
 
 
-        ArticleCashMessageId articleMessage = new ArticleCashMessageId();
-        articleMessage.setArticleId(article.getId());
-        articleMessage.setIsDeleteList(true);
+
+
         if (isEdit){
-            //发送一条消息给rocketmq 当前文章更新了，更新一下缓存吧
-            rocketMQTemplate.convertAndSend("automa-update-article",articleMessage);
-        }else{
-            Set<String> keys = redisTemplate.keys("listArticle*");
+            Set<String> keys = redisTemplate.keys("view_article*");
             keys.forEach(s -> {
                 redisTemplate.delete(s);
-                log.info("删除了文章列表的缓存:{}",s);
+                log.info("publish删除了文章的缓存:{}",s);
             });
         }
 
+        Set<String> keys = redisTemplate.keys("listArticle*");
+        keys.forEach(s -> {
+            redisTemplate.delete(s);
+            log.info("publish删除了文章列表的缓存:{}",s);
+        });
 
         return Result.success(map);
     }
